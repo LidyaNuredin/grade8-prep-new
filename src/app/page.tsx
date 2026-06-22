@@ -1,65 +1,94 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [examType, setExamType] = useState("");
+  const [subject, setSubject] = useState("");
+
+  const subjects = [
+    { id: "science", name: "General Science", icon: "🔬" },
+    { id: "math", name: "Mathematics", icon: "🧮" },
+    { id: "social", name: "Social Studies", icon: "🌍" },
+    { id: "english", name: "English Language", icon: "📚" },
+  ];
+
+  const years = ["2015", "2016", "2017"];
+
+  const handleSelectYear = (year: string) => {
+    // Dynamic navigation routing pattern: /ministry/science/2015 or /model/math/2016
+    router.push(`/${examType}/${subject}/${year}`);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+      <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        
+        {/* Progress Navigation Tracker Header */}
+        <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">
+          <span className={step >= 1 ? "text-blue-600" : ""}>1. Category</span>
+          <span>➔</span>
+          <span className={step >= 2 ? "text-blue-600" : ""}>2. Subject</span>
+          <span>➔</span>
+          <span className={step >= 3 ? "text-blue-600" : ""}>3. Year</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        {/* STEP 1: Choose Model or Ministry */}
+        {step === 1 && (
+          <div className="space-y-6 animate-fadeIn">
+            <h2 className="text-2xl font-extrabold text-gray-800 text-center">Select Exam Category</h2>
+            <div className="grid grid-cols-1 gap-4">
+              <button onClick={() => { setExamType("ministry"); setStep(2); }} className="p-5 border-2 border-gray-200 hover:border-blue-500 rounded-xl text-left bg-gray-50 hover:bg-blue-50/50 transition">
+                <span className="block font-bold text-lg text-gray-800">🏛️ National Ministry Exam</span>
+                <span className="text-sm text-gray-500">Official regional Grade 8 baseline assessments.</span>
+              </button>
+              <button onClick={() => { setExamType("model"); setStep(2); }} className="p-5 border-2 border-gray-200 hover:border-blue-500 rounded-xl text-left bg-gray-50 hover:bg-blue-50/50 transition">
+                <span className="block font-bold text-lg text-gray-800">📝 Standard Model Exam</span>
+                <span className="text-sm text-gray-500">Curated mock preparation test blueprints.</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: Choose Subject */}
+        {step === 2 && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-2">
+              <button onClick={() => setStep(1)} className="text-sm text-blue-600 font-medium hover:underline">← Back</button>
+            </div>
+            <h2 className="text-2xl font-extrabold text-gray-800 text-center capitalize">Select Your Course Subject</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {subjects.map((sub) => (
+                <button key={sub.id} onClick={() => { setSubject(sub.id); setStep(3); }} className="flex items-center gap-4 p-4 border-2 border-gray-200 hover:border-blue-500 rounded-xl bg-gray-50 hover:bg-blue-50/30 transition text-gray-800 font-medium">
+                  <span className="text-2xl">{sub.icon}</span>
+                  {sub.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: Choose Year */}
+        {step === 3 && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-2">
+              <button onClick={() => setStep(2)} className="text-sm text-blue-600 font-medium hover:underline">← Back</button>
+            </div>
+            <h2 className="text-2xl font-extrabold text-gray-800 text-center">Select Exam Year (E.C.)</h2>
+            <div className="grid grid-cols-1 gap-3">
+              {years.map((year) => (
+                <button key={year} onClick={() => handleSelectYear(year)} className="p-4 border-2 border-gray-200 hover:border-blue-500 rounded-xl bg-gray-50 text-center font-bold text-gray-700 hover:bg-blue-50 text-base tracking-wide transition">
+                  {year} E.C. Exam Sheet
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </main>
   );
 }
