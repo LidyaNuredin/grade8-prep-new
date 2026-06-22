@@ -44,12 +44,18 @@ export default function StudentQuizEngine() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50 font-medium text-gray-500">Loading your test workspace...</div>;
   
-  if (questions.length === 0) {
+if (questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow border max-w-sm">
-          <h3 className="text-xl font-bold text-gray-800 mb-1">No Questions Added</h3>
-          <p className="text-gray-500 text-sm">No items matching this combination are present in your database yet.</p>
+      <div className="min-h-[70vh] flex items-center justify-center bg-gray-50 text-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-sm space-y-4">
+          <div className="text-4xl">📂</div>
+          <h3 className="text-xl font-black text-gray-800">Exam Sheet Empty</h3>
+          <p className="text-gray-500 text-sm leading-relaxed">
+            No questions matching this specific setup have been added to the database panel yet.
+          </p>
+          <a href="/" className="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 rounded-xl transition shadow-md">
+            Return to Dashboard
+          </a>
         </div>
       </div>
     );
