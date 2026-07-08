@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Question {
   id: string;
@@ -16,6 +17,7 @@ interface Question {
 
 export default function StudentQuizEngine() {
   const params = useParams();
+  const router = useRouter();
   const examType = params?.examType as string;
   const subject = params?.subject as string;
   const year = params?.year as string;
@@ -24,6 +26,7 @@ export default function StudentQuizEngine() {
   const [loading, setLoading] = useState(true);
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string }>({});
   const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState(0);
 
   useEffect(() => {
     async function getQuestionsData() {
@@ -42,9 +45,24 @@ export default function StudentQuizEngine() {
     if (examType && subject && year) getQuestionsData();
   }, [examType, subject, year]);
 
+  // Calculate score when the student hits the grade button
+  const handleGradeExam = () => {
+    let correctCount = 0;
+    questions.forEach((q) => {
+      if (selectedAnswers[q.id] === q.answer) {
+        correctCount++;
+      }
+    });
+    setScore(correctCount);
+    setSubmitted(true);
+    
+    // Smoothly scroll to the top of the page so they immediately see their score banner
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50 font-medium text-gray-500">Loading your test workspace...</div>;
   
-if (questions.length === 0) {
+  if (questions.length === 0) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center bg-gray-50 text-center p-4">
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-sm space-y-4">
@@ -53,9 +71,9 @@ if (questions.length === 0) {
           <p className="text-gray-500 text-sm leading-relaxed">
             No questions matching this specific setup have been added to the database panel yet.
           </p>
-          <a href="/" className="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 rounded-xl transition shadow-md">
+          <Link href="/" className="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 rounded-xl transition shadow-md">
             Return to Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -65,11 +83,48 @@ if (questions.length === 0) {
     <main className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
         
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-          <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight">{subject} Quiz Sheet</h1>
-          <p className="text-gray-500 text-sm font-medium capitalize mt-1">Type: {examType} Exam — {year} E.C.</p>
+        {/* Info Header */}
+        <div className="bg-white p-6 rounded-xl border shadow-sm flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight">{subject} Quiz Sheet</h1>
+            <p className="text-gray-500 text-sm font-medium capitalize mt-1">Type: {examType} Exam — {year} E.C.</p>
+          </div>
+          <Link href="/" className="text-sm font-bold text-blue-600 hover:underline">
+            ← Exit Exam
+          </Link>
         </div>
 
+        {/* Dynamic Overall Score Result Banner */}
+        {submitted && (() => {
+          const percentage = Math.round((score / questions.length) * 100);
+          const isPassing = percentage >= 50;
+
+          return isPassing ? (
+            /* Green Banner for 50% and above (As seen in image_c5a0a8.png) */
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 p-6 rounded-2xl shadow-sm text-center space-y-3 animate-fadeIn">
+              <h2 className="text-xl font-black text-green-900">🎉 Exam Completed!</h2>
+              <p className="text-3xl font-black text-green-600 tracking-tight">
+                Your Score: {score} / {questions.length}
+              </p>
+              <p className="text-sm text-green-700 font-medium">
+                Percentage: {percentage}%
+              </p>
+            </div>
+          ) : (
+            /* New Red Banner for under 50% */
+            <div className="bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 p-6 rounded-2xl shadow-sm text-center space-y-3 animate-fadeIn">
+              <h2 className="text-xl font-black text-red-900">📚 Keep Practicing!</h2>
+              <p className="text-3xl font-black text-red-600 tracking-tight">
+                Your Score: {score} / {questions.length}
+              </p>
+              <p className="text-sm text-red-700 font-medium">
+                Percentage: {percentage}%
+              </p>
+            </div>
+          );
+        })()}
+
+        {/* Questions Loop Container */}
         {questions.map((q, idx) => {
           const optionsArray = q.options.split("|||");
           return (
@@ -105,9 +160,9 @@ if (questions.length === 0) {
                 })}
               </div>
 
-              {/* Reveal Explanation Block post grading action trigger event */}
+              {/* Solutions Reveal Area */}
               {submitted && (
-                <div className="mt-4 p-4 bg-blue-50/50 border border-blue-100 rounded-lg text-sm text-gray-700 leading-relaxed animate-fadeIn">
+                <div className="mt-4 p-4 bg-blue-50/50 border border-blue-100 rounded-lg text-sm text-gray-700 leading-relaxed">
                   <span className="font-bold text-blue-800 block mb-1">💡 Solution Explanation:</span>
                   {q.explanation}
                 </div>
@@ -116,12 +171,41 @@ if (questions.length === 0) {
           );
         })}
 
-        <button
-          onClick={() => setSubmitted(!submitted)}
-          className={`w-full text-white font-bold py-3.5 rounded-xl transition ${submitted ? "bg-gray-600 hover:bg-gray-700" : "bg-green-600 hover:bg-green-700"}`}
-        >
-          {submitted ? "Reset Answer Key View" : "✔ Submit and Grade Exam"}
-        </button>
+        {/* Main Action Buttons */}
+        {!submitted ? (
+          <button
+            onClick={handleGradeExam}
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition active:scale-[0.99]"
+          >
+            ✔ Submit and Grade Exam
+          </button>
+        ) : (
+          /* Two Button Layout Side-by-Side on Desktop, Stacked on Mobile */
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              onClick={() => {
+                sessionStorage.removeItem("quiz_step"); // Ensure a clean dashboard load
+                router.push("/");
+              }}
+              className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-4 rounded-xl shadow-md transition active:scale-[0.99] text-center"
+            >
+              🏠 Return to Dashboard
+            </button>
+            
+            <button
+              onClick={() => {
+                // Bookmark current progress parameters
+                sessionStorage.setItem("quiz_step", "3");
+                sessionStorage.setItem("quiz_examType", examType);
+                sessionStorage.setItem("quiz_subject", subject);
+                router.push("/");
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition active:scale-[0.99] text-center"
+            >
+              📅 Back to Years
+            </button>
+          </div>
+        )}
 
       </div>
     </main>

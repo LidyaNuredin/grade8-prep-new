@@ -26,7 +26,6 @@ export default function RootLayout({
             </Link>
             <nav className="flex items-center gap-4 text-sm font-semibold text-gray-600">
               <Link href="/" className="hover:text-blue-600 transition">Student Panel</Link>
-              <Link href="/admin" className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3.5 py-1.5 rounded-lg transition">Admin Portal</Link>
             </nav>
           </div>
         </header>
